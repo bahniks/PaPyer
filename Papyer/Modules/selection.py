@@ -17,10 +17,29 @@ You should have received a copy of the GNU General Public License
 along with PaPyer.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-def placeWindow(window, windowWidth = 200, windowHeight = 300, xShift = 0, yShift = -30):
-    "moves the window to the center of a screen"    
-    screenWidth = window.winfo_screenwidth()
-    screenHeight = window.winfo_screenheight()
-    xPosition = int((screenWidth - windowWidth) / 2) + xShift
-    yPosition = max(int((screenHeight - windowHeight) / 2) + yShift, 10)
-    window.geometry("+" + str(xPosition) + "+" + str(yPosition))
+from tkinter import *
+from tkinter import ttk
+
+
+
+
+class Select(ttk.Entry):
+    def __init__(self, root, **kwargs):
+        super().__init__(root, **kwargs)
+
+        self.root = root
+        self.bind("<KeyPress>", self.sift)
+
+    def sift(self, e):
+        if e.char:
+            if e.char != '\x08':
+                self.root.filetree.leave(self.root.selectVar.get() + e.char)
+            else:
+                self.root.filetree.leave(self.root.selectVar.get()[:-1])
+        
+   
+        
+
+
+
+

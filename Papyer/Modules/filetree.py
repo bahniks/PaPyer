@@ -1,28 +1,28 @@
 """
 Copyright 2015 Štěpán Bahník
 
-This file is part of Papyer.
+This file is part of PaPyer.
 
-Carousel Maze Manager is free software: you can redistribute it and/or modify
+PaPyer is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
 
-Carousel Maze Manager is distributed in the hope that it will be useful,
+PaPyer is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with Papyer.  If not, see <http://www.gnu.org/licenses/>.
+along with PaPyer.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-from tkinter.filedialog import askopenfilenames, askdirectory, askopenfilename
+#from tkinter.filedialog import askopenfilenames, askdirectory, askopenfilename
 from tkinter import *
-from tkinter import messagebox
-from os.path import basename
+#from tkinter import messagebox
+#from os.path import basename
 from tkinter import ttk
-from collections import defaultdict, OrderedDict
+#from collections import defaultdict, OrderedDict
 import os
 
 
@@ -34,17 +34,20 @@ class FileTree(ttk.Treeview):
 
         self.root = root
         self.filestorage = self.root.filestorage
+
+        self.labels = ["Read", "Problem"] # load from a file
         
-        self["columns"] = ("directory", "tags")
-        self.column("#0", width = 500, anchor = "w")
+        self["columns"] = ["directory"] + self.labels
+        self.column("#0", width = 400, anchor = "w")
         self.heading("#0", text = "Filename")
-        self.column("directory", width = 400, anchor = "w")
+        self.column("directory", width = 300, anchor = "w")
         self.heading("directory", text = "Directory")
-        self.column("tags", width = 30, anchor = "center")
-        self.heading("tags", text = "Tags", command = lambda e: print("hi"))
+        for label in self.labels:
+            self.column(label, width = 60, anchor = "center")
+            self.heading(label, text = label, command = lambda e: print("hi"))
         
 
-##        self.filesTree.bind("<3>", lambda e: self.popUp(e))
+        self.bind("<1>", lambda e: self.clicked(e))
         self.bind("<Double-1>", lambda e: self.doubleClick(e))
 ##        self.filesTree.tag_configure("comment", background = commentColor())         
 
@@ -54,20 +57,43 @@ class FileTree(ttk.Treeview):
 
     def initialize(self):
         "initializes the treeview containing files"
-        for file, infos in self.filestorage.files.items():
-            self.insert("", "end", file, text = infos[0], values = (infos[1], ""))
+        for file, info in self.filestorage.items():
+            self.insert("", "end", file, text = info["file"], values = (info["dir"], ""))
 
 
     def doubleClick(self, event):
         """opens either the file or the directory containing the file based on the
             column double-clicked"""
         item = self.identify("item", event.x, event.y)
+        print(item)
         if item:
             column = self.identify("column", event.x, event.y)
             if column == "#0":
-                os.startfile(item)
+                os.startfile(self.filestorage.files[item]["path"])
             elif column == "#1":
-                os.startfile(os.path.split(item)[0])
+                os.startfile(os.path.split(self.filestorage.files[item]["path"])[0])
+
+
+    def clicked(self, event):
+        item = self.identify("item", event.x, event.y)
+        if item:
+            column = self.column(self.identify("column", event.x, event.y), "id")
+            if column in self.labels:
+                if not column in self.filestorage.files[item]["tags"]:
+                    self.set(item, column, "x")
+                    self.filestorage.files[item]["tags"].add(column)
+                else:
+                    self.set(item, column, "")
+                    self.filestorage.files[item]["tags"].remove(column)
+
+
+    def leave(self, letters):
+        self.delete(*self.get_children())
+        for file, info in self.filestorage.items():
+            if info["file"].startswith(letters):
+                self.insert("", "end", file, text = info["file"], values = (info["dir"], ""))
+
+                
 
 
 
