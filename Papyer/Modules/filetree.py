@@ -22,7 +22,7 @@ from tkinter import *
 #from tkinter import messagebox
 #from os.path import basename
 from tkinter import ttk
-#from collections import defaultdict, OrderedDict
+from collections import OrderedDict
 import os
 
 
@@ -39,17 +39,18 @@ class FileTree(ttk.Treeview):
         
         self["columns"] = ["directory"] + self.labels
         self.column("#0", width = 400, anchor = "w")
-        self.heading("#0", text = "Filename")
+        self.heading("#0", text = "Filename", command = self.orderByFilename)
         self.column("directory", width = 300, anchor = "w")
-        self.heading("directory", text = "Directory")
+        self.heading("directory", text = "Directory", command = self.orderByDirectory)
         for label in self.labels:
             self.column(label, width = 60, anchor = "center")
-            self.heading(label, text = label, command = lambda e: print("hi"))
+            self.heading(label, text = label)
         
 
         self.bind("<1>", lambda e: self.clicked(e))
         self.bind("<Double-1>", lambda e: self.doubleClick(e))
-##        self.filesTree.tag_configure("comment", background = commentColor())         
+        self.tag_configure("duplicate", background = "white")
+        self.duplicatesShown = False
 
         self.initialize()
 
@@ -58,20 +59,20 @@ class FileTree(ttk.Treeview):
     def initialize(self):
         "initializes the treeview containing files"
         for file, info in self.filestorage.items():
-            self.insert("", "end", file, text = info["file"], values = (info["dir"], ""))
+            tags = self.getTags(file)
+            self.insert("", "end", file, text = info["file"], values = (info["dir"], ""), tag = tags)
 
 
     def doubleClick(self, event):
         """opens either the file or the directory containing the file based on the
             column double-clicked"""
         item = self.identify("item", event.x, event.y)
-        print(item)
         if item:
             column = self.identify("column", event.x, event.y)
             if column == "#0":
-                os.startfile(self.filestorage.files[item]["path"])
+                os.startfile(item)
             elif column == "#1":
-                os.startfile(os.path.split(self.filestorage.files[item]["path"])[0])
+                os.startfile(os.path.split(item)[0])
 
 
     def clicked(self, event):
@@ -86,15 +87,51 @@ class FileTree(ttk.Treeview):
                     self.set(item, column, "")
                     self.filestorage.files[item]["tags"].remove(column)
 
+                    
+    def getTags(self, file):
+        if file in self.filestorage.duplicates:
+            tags = "duplicate"
+        else:
+            tags = ""
+        return tags    
+                
+
 
     def leave(self, letters):
         self.delete(*self.get_children())
         for file, info in self.filestorage.items():
             if info["file"].startswith(letters):
-                self.insert("", "end", file, text = info["file"], values = (info["dir"], ""))
+                tags = self.getTags(file)
+                self.insert("", "end", file, text = info["file"],
+                            values = (info["dir"], ""), tag = tags)
 
-                
 
+    def toggleDuplicates(self):
+        if self.duplicatesShown:
+            self.tag_configure("duplicate", background = "white")
+            self.duplicatesShown = False
+        else:
+            self.tag_configure("duplicate", background = "yellow")
+            self.duplicatesShown = True
+ 
+
+    def orderByFilename(self):
+        "orders files by filename"
+        self.filestorage.files = OrderedDict(sorted(self.filestorage.files.items(),
+                                                    key = lambda i: i[1]["file"]))        
+        self.refresh() 
+
+
+    def orderByDirectory(self):
+        "orders files by name of the parent directory"
+        self.filestorage.files = OrderedDict(sorted(self.filestorage.files.items(),
+                                                    key = lambda i: i[1]["dir"]))
+        self.refresh()
+
+
+    def refresh(self):
+        self.delete(*self.get_children())
+        self.initialize()
 
 
 
@@ -174,22 +211,7 @@ class FileTree(ttk.Treeview):
 ##        self.refresh()
 ##            
 ##
-##    def orderByFilename(self):
-##        "orders files by filename"
-##        if self.shownFiles == "arenafiles":
-##            self.fileStorage.arenafiles.sort(key = lambda i: basename(i))
-##        else:
-##            self.fileStorage.wrongfiles.sort(key = lambda i: basename(i))
-##        self.refresh()
-##
-##
-##    def orderByDirectory(self):
-##        "orders files by name of the parent directory"
-##        if self.shownFiles == "arenafiles":
-##            self.fileStorage.arenafiles.sort(key = lambda i: os.path.split(i)[0])
-##        else:
-##            self.fileStorage.wrongfiles.sort(key = lambda i: os.path.split(i)[0])
-##        self.refresh()            
+       
 ##            
 ##        
 ##    

@@ -31,6 +31,7 @@ from window import placeWindow
 from filestorage import FileStorage
 from filetree import FileTree
 from selection import Select
+from buttons import Buttons
 
 
 
@@ -76,6 +77,9 @@ class GUI(Tk):
         self.columnconfigure(1, weight = 1)
         self.columnconfigure(3, weight = 1)
         self.rowconfigure(1, weight = 1)
+
+        self.buttons = Buttons(self)
+        self.buttons.grid(row = 2, column = 0, columnspan = 5, pady = 5)
 
         self.mainloop()
 

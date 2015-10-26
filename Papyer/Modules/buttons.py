@@ -23,16 +23,28 @@ from tkinter import ttk
 
 
 
-class Select(ttk.Entry):
-    def __init__(self, root, **kwargs):
-        super().__init__(root, **kwargs)
+class Buttons(Frame):
+    def __init__(self, root):
+        super().__init__(root)
         
         self.root = root
-        self.bind("<KeyRelease>", self.sift)
+        self.filestorage = self.root.filestorage
+
+        self.duplicatesBut = ttk.Button(self, command = self.duplicates,
+                                        text = "Show duplicates", width = 15)
+        self.duplicatesBut.grid(column = 0, row = 0)
 
 
-    def sift(self, e):
-        self.root.filetree.leave(self.get())
+    def duplicates(self):
+        self.root.filetree.toggleDuplicates()
+        if self.root.filetree.duplicatesShown:
+            self.duplicatesBut["text"] = "Hide duplicates"
+        else:
+            self.duplicatesBut["text"] = "Show duplicates"
+
+
+
+
 
    
         

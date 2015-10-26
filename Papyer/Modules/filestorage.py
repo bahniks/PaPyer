@@ -45,16 +45,23 @@ class FileStorage:
         return self.files.items()
     
     def addFiles(self):
+        unique = {}
+        self.duplicates = set()
         base = len(self.root.base) + 1
         count = 1
         for content in os.walk(self.root.base):
             directory = content[0]
             for file in content[2]:
                 if not "py" in os.path.splitext(file)[1]:
-                    self.files["f" + str(count)] = {"file": file,
-                                                    "dir": directory[base:],
-                                                    "tags": set(),
-                                                    "path": os.path.join(directory, file)}
+                    path = os.path.normpath(os.path.join(directory, file))
+                    self.files[path] = {"file": file,
+                                        "dir": directory[base:],
+                                        "tags": set()}
+                    if not file in unique:
+                        unique[file] = path
+                    else:
+                        self.duplicates.add(path)
+                        self.duplicates.add(unique[file])
                     count += 1
 
 
