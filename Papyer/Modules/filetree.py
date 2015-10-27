@@ -19,8 +19,7 @@ along with PaPyer.  If not, see <http://www.gnu.org/licenses/>.
 
 #from tkinter.filedialog import askopenfilenames, askdirectory, askopenfilename
 from tkinter import *
-#from tkinter import messagebox
-#from os.path import basename
+from tkinter import messagebox
 from tkinter import ttk
 from collections import OrderedDict
 import os
@@ -49,11 +48,11 @@ class FileTree(ttk.Treeview):
 
         self.bind("<1>", lambda e: self.clicked(e))
         self.bind("<Double-1>", lambda e: self.doubleClick(e))
+        self.bind("<3>", lambda e: self.rightClicked(e))
         self.tag_configure("duplicate", background = "white")
         self.duplicatesShown = False
 
         self.initialize()
-
 
 
     def initialize(self):
@@ -96,7 +95,6 @@ class FileTree(ttk.Treeview):
         return tags    
                 
 
-
     def leave(self, letters):
         self.delete(*self.get_children())
         for file, info in self.filestorage.items():
@@ -134,6 +132,36 @@ class FileTree(ttk.Treeview):
         self.initialize()
 
 
+    def rightClicked(self, event):
+        "called when tree item is right-clicked on"
+        item = self.identify("item", event.x, event.y)
+        menu = Menu(self, tearoff = 0)
+        if item:
+            column = self.column(self.identify("column", event.x, event.y), "id")
+            if not column:
+                selected = self.selection()
+                if item in selected and len(selected) > 1:                                        
+                    menu.add_command(label = "Delete files", command = lambda: self.deleteFile())
+                else:
+                    self.selection_set(item.replace("\\", "\\\\"))
+                    menu.add_command(label = "Delete file", command = lambda: self.deleteFile())
+        menu.post(event.x_root, event.y_root)
+
+
+    def deleteFile(self):
+        plural = "s" if len(self.selection()) > 1 else ""
+        text = "Are you sure you want to delete the file{}?".format(plural)
+        answ = messagebox.askyesno(message = text, icon = "question",
+                                   title = "Delete file{}?".format(plural))
+        if answ:
+            for file in self.selection():
+                os.remove(file)
+                self.filestorage.files.pop(file)
+        self.refresh()
+
+            
+            
+
 
 
 ##    def refresh(self):
@@ -149,28 +177,7 @@ class FileTree(ttk.Treeview):
 ##        
 
 ##
-##    def popUp(self, event):
-##        "called when tree item is right-clicked on"
-##        item = self.filesTree.identify("item", event.x, event.y)
-##        menu = Menu(self, tearoff = 0)
-##        if item and self.shownFiles == "arenafiles":
-##            if item in self.fileStorage.tagged:
-##                menu.add_command(label = "Remove tag", command = lambda: self.untagFun(item))
-##            else:
-##                menu.add_command(label = "Add tag", command = lambda: self.tagFun(item))
-##            menu.add_command(label = "Add comment", command = lambda: Comment(self, item))
-##            selection = self.filesTree.selection()
-##            if len(selection) > 1 and any([item == file for file in selection]):
-##                menu.add_command(label = "Add comments", command = lambda: Comment(self, selection))
-##            menu.add_separator()
-##            if self.filesTree.identify("column", event.x, event.y) == "#0" and m.files == "pair":
-##                menu.add_command(label = "Open paired file",
-##                                 command = lambda: self.openRoomFile(item))
-##                menu.add_separator()
-##            menu.add_command(label = "Show track", command = lambda: self.showTracks(item))
-##        if item and self.shownFiles == "wrongfiles" and len(self.filesTree.selection()) == 2:
-##            menu.add_command(label = "Pair selected", command = lambda: self.forcePair())
-##        menu.post(event.x_root, event.y_root)        
+   
 ##
 ##
 ##
