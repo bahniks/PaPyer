@@ -60,6 +60,8 @@ class FileTree(ttk.Treeview):
         for file, info in self.filestorage.items():
             tags = self.getTags(file)
             self.insert("", "end", file, text = info["file"], values = (info["dir"], ""), tag = tags)
+            for tag in info["tags"]:
+                self.set(file, tag, "x")
 
 
     def doubleClick(self, event):

@@ -87,6 +87,7 @@ class GUI(Tk):
 
     def closeFun(self):
         "ask for saving files on exit"
+        self.filestorage.save()
         self.destroy()
 
 

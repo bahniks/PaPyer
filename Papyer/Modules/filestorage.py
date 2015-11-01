@@ -23,6 +23,7 @@ from tkinter import *
 from tkinter import ttk
 from collections import OrderedDict
 import os
+import pickle
 
 
 #File = namedtuple("File", ["file", "dir", "tags"])
@@ -33,6 +34,7 @@ class FileStorage:
     def __init__(self, root):
         self.root = root
         self.files = OrderedDict()
+        self.load()
         self.addFiles()
 
     def __iter__(self):
@@ -43,6 +45,14 @@ class FileStorage:
     
     def items(self):
         return self.files.items()
+
+    def load(self):
+        path = os.path.join(os.getcwd(), "data.papyer")
+        if os.path.exists(path):
+            with open(path, mode = "rb") as f:
+                self.loaded = pickle.load(f)
+        else:
+            self.loaded = {}
     
     def addFiles(self):
         unique = {}
@@ -54,15 +64,34 @@ class FileStorage:
             for file in content[2]:
                 if not "py" in os.path.splitext(file)[1]:
                     path = os.path.normpath(os.path.join(directory, file))
+                    if file in self.loaded:
+                        tags = self.loaded[file]
+                    else:
+                        tags = set()
                     self.files[path] = {"file": file,
                                         "dir": directory[base:],
-                                        "tags": set()}
+                                        "tags": tags}
                     if not file in unique:
                         unique[file] = path
                     else:
                         self.duplicates.add(path)
                         self.duplicates.add(unique[file])
                     count += 1
+
+    def save(self):
+        path = os.path.join(os.getcwd(), "data.papyer")
+        if os.path.exists(path):
+            os.remove(path)
+        store = {}
+        for file in self.files.values():
+            filename = file["file"]
+            if filename in store and store[filename] != file["tags"]:
+                print("Duplicates are not equal.") # neco s timhle udelat
+            store[file["file"]] = file["tags"]
+        with open(path, mode = "wb") as f:
+            pickle.dump(store, file = f)
+        
+        
 
 
 
