@@ -47,7 +47,7 @@ class FileStorage:
         return self.files.items()
 
     def load(self):
-        path = os.path.join(os.getcwd(), "data.papyer")
+        path = os.path.join(os.getcwd(), "papyer.data")
         if os.path.exists(path):
             with open(path, mode = "rb") as f:
                 self.loaded = pickle.load(f)
@@ -79,7 +79,7 @@ class FileStorage:
                     count += 1
 
     def save(self):
-        path = os.path.join(os.getcwd(), "data.papyer")
+        path = os.path.join(os.getcwd(), "papyer.data")
         if os.path.exists(path):
             os.remove(path)
         store = {}

@@ -32,6 +32,8 @@ from filestorage import FileStorage
 from filetree import FileTree
 from selection import Select
 from buttons import Buttons
+from menu import TopMenu
+from options import Options
 
 
 
@@ -48,7 +50,8 @@ class GUI(Tk):
         self.minsize(x, y)
         placeWindow(self, x, y)
 
-        self["menu"] = Menu(self)
+        self["menu"] = TopMenu(self)
+        self.options = Options(self)
 
         self.protocol("WM_DELETE_WINDOW", self.closeFun)
 
@@ -88,6 +91,7 @@ class GUI(Tk):
     def closeFun(self):
         "ask for saving files on exit"
         self.filestorage.save()
+        self.options.save()
         self.destroy()
 
 

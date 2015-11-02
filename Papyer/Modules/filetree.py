@@ -33,15 +33,14 @@ class FileTree(ttk.Treeview):
 
         self.root = root
         self.filestorage = self.root.filestorage
+        self.options = self.root.options
 
-        self.labels = ["Read", "Problem"] # load from a file
-        
-        self["columns"] = ["directory"] + self.labels
+        self["columns"] = ["directory"] + self.options["tags"]
         self.column("#0", width = 400, anchor = "w")
         self.heading("#0", text = "Filename", command = self.orderByFilename)
         self.column("directory", width = 300, anchor = "w")
         self.heading("directory", text = "Directory", command = self.orderByDirectory)
-        for label in self.labels:
+        for label in self.options["tags"]:
             self.column(label, width = 60, anchor = "center")
             self.heading(label, text = label)
         
@@ -80,7 +79,7 @@ class FileTree(ttk.Treeview):
         item = self.identify("item", event.x, event.y)
         if item:
             column = self.column(self.identify("column", event.x, event.y), "id")
-            if column in self.labels:
+            if column in self.options["tags"]:
                 if not column in self.filestorage.files[item]["tags"]:
                     self.set(item, column, "x")
                     self.filestorage.files[item]["tags"].add(column)
