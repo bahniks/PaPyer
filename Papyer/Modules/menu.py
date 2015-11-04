@@ -32,16 +32,21 @@ class TopMenu(Menu):
 
         self.menuFile = Menu(self)
         self.menuOptions = Menu(self)
+        self.menuAbout = Menu(self)
 
         menuWidth = 8
         self.add_cascade(menu = self.menuFile, label = "{:^{}}".format("File", menuWidth))
         self.add_cascade(menu = self.menuOptions, label = "{:^{}}".format("Options", menuWidth))
+        self.add_cascade(menu = self.menuOptions, label = "{:^{}}".format("About", menuWidth))
 
         self.menuFile.add_command(label = "Close", command = self.root.closeFun)
 
         self.menuOptions.add_command(label = "Change tags", command = self.changeTags)
         self.menuOptions.add_separator()
         self.menuOptions.add_command(label = "Settings", command = self.openSettings)
+
+        self.menuAbout.add_command(label = "About")
+        self.menuAbout.add_command(label = "Version")
 
 
     def changeTags(self):

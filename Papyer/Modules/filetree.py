@@ -17,7 +17,6 @@ You should have received a copy of the GNU General Public License
 along with PaPyer.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-#from tkinter.filedialog import askopenfilenames, askdirectory, askopenfilename
 from tkinter import *
 from tkinter import messagebox
 from tkinter import ttk
@@ -86,6 +85,8 @@ class FileTree(ttk.Treeview):
                 else:
                     self.set(item, column, "")
                     self.filestorage.files[item]["tags"].remove(column)
+            elif not column:
+                self.root.notes.changeFile(item)
 
                     
     def getTags(self, file):
@@ -159,69 +160,3 @@ class FileTree(ttk.Treeview):
                 os.remove(file)
                 self.filestorage.files.pop(file)
         self.refresh()
-
-            
-            
-
-
-
-##    def refresh(self):
-##        "refreshes the window - i.e. redraws the tree"
-##        for item in self.filesTree.get_children(""):
-##            self.filesTree.delete(item)
-##        if self.shownFiles == "arenafiles":
-##            self.initfiles = self.fileStorage.arenafiles
-##        else:
-##            self.initfiles = self.fileStorage.wrongfiles            
-##        self.initialize()           
-##        self.root.update()
-##        
-
-##
-   
-##
-##
-##
-##    def untagFun(self, file):
-##        "untags the file in the argument"
-##        self.fileStorage.tagged.remove(file)
-##        self.filesTree.set(file, "tag", "")
-##
-##
-##    def tagFun(self, file):
-##        "tags the file in the argument"
-##        self.fileStorage.tag(file)
-##        self.filesTree.set(file, "tag", "x")
-##
-##
-##    def untagFilesFun(self):
-##        "untags selected files"
-##        for file in self.filesTree.selection():
-##            if file in self.fileStorage.tagged:
-##                self.untagFun(file)
-##        self.root.update()
-##
-##
-##    def tagFilesFun(self):
-##        "tags selected files"
-##        for file in self.filesTree.selection():
-##            if file not in self.fileStorage.tagged:
-##                self.tagFun(file)
-##        self.root.update()
-##                
-##
-##
-##
-##    def orderByTag(self):
-##        "orders files by presence of tag"
-##        self.fileStorage.arenafiles.sort(key = lambda i: (i in self.fileStorage.tagged),
-##                                         reverse = True)
-##        self.refresh()
-##            
-##
-       
-##            
-##        
-##    
-##            
-##

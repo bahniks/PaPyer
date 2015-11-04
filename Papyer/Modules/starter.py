@@ -21,11 +21,8 @@ along with PaPyer.  If not, see <http://www.gnu.org/licenses/>.
 from tkinter import *
 from tkinter import ttk
 from tkinter import messagebox
-#from time import localtime, strftime
 
 import os
-#import sys
-
 
 from window import placeWindow
 from filestorage import FileStorage
@@ -34,6 +31,7 @@ from selection import Select
 from buttons import Buttons
 from menu import TopMenu
 from options import Options
+from notes import Notes
 
 
 
@@ -71,18 +69,24 @@ class GUI(Tk):
 
         self.filestorage = FileStorage(self)
         self.filetree = FileTree(self)
-        self.filetree.grid(column = 0, row = 1, sticky = (N, S, E, W), columnspan = 4)
+        self.filetree.grid(column = 0, row = 1, rowspan = 2, sticky = (N, S, E, W), columnspan = 4)
 
         self.scrollbar = ttk.Scrollbar(self, orient = VERTICAL, command = self.filetree.yview)
-        self.scrollbar.grid(column = 4, row = 1, sticky = (N, S, E))
+        self.scrollbar.grid(column = 4, row = 1, rowspan = 2,sticky = (N, S, E))
         self.filetree.configure(yscrollcommand = self.scrollbar.set)
+
+        self.notes = Notes(self)
+        self.notes.grid(column = 5, row = 2, sticky = (N, S, E, W), padx = 5)
+
+        self.notesLab = ttk.Label(text = "Notes")
+        self.notesLab.grid(column = 5, row = 1, padx = 5, pady = 2)
 
         self.columnconfigure(1, weight = 1)
         self.columnconfigure(3, weight = 1)
         self.rowconfigure(1, weight = 1)
 
         self.buttons = Buttons(self)
-        self.buttons.grid(row = 2, column = 0, columnspan = 5, pady = 5)
+        self.buttons.grid(row = 3, column = 0, columnspan = 5, pady = 5)
 
         self.mainloop()
 

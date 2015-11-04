@@ -65,12 +65,15 @@ class FileStorage:
                 if not "py" in os.path.splitext(file)[1]:
                     path = os.path.normpath(os.path.join(directory, file))
                     if file in self.loaded:
-                        tags = self.loaded[file]
+                        tags = self.loaded[file]["tags"]
+                        note = self.loaded[file]["note"]
                     else:
                         tags = set()
+                        note = ""
                     self.files[path] = {"file": file,
                                         "dir": directory[base:],
-                                        "tags": tags}
+                                        "tags": tags,
+                                        "note": note}
                     if not file in unique:
                         unique[file] = path
                     else:
@@ -85,9 +88,8 @@ class FileStorage:
         store = {}
         for file in self.files.values():
             filename = file["file"]
-            if filename in store and store[filename] != file["tags"]:
-                print("Duplicates are not equal.") # neco s timhle udelat
-            store[file["file"]] = file["tags"]
+            store[file["file"]] = {"tags": file["tags"],
+                                   "note": file["note"]}
         with open(path, mode = "wb") as f:
             pickle.dump(store, file = f)
         
