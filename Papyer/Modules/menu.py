@@ -37,7 +37,7 @@ class TopMenu(Menu):
         menuWidth = 8
         self.add_cascade(menu = self.menuFile, label = "{:^{}}".format("File", menuWidth))
         self.add_cascade(menu = self.menuOptions, label = "{:^{}}".format("Options", menuWidth))
-        self.add_cascade(menu = self.menuOptions, label = "{:^{}}".format("About", menuWidth))
+        self.add_cascade(menu = self.menuAbout, label = "{:^{}}".format("About", menuWidth))
 
         self.menuFile.add_command(label = "Close", command = self.root.closeFun)
 
@@ -45,8 +45,8 @@ class TopMenu(Menu):
         self.menuOptions.add_separator()
         self.menuOptions.add_command(label = "Settings", command = self.openSettings)
 
-        self.menuAbout.add_command(label = "About")
-        self.menuAbout.add_command(label = "Version")
+        self.menuAbout.add_command(label = "About", command = self.about)
+        self.menuAbout.add_command(label = "Version", command = self.version)
 
 
     def changeTags(self):
@@ -54,6 +54,12 @@ class TopMenu(Menu):
 
 
     def openSettings(self):
+        pass
+
+    def version(self):
+        pass
+
+    def about(self):
         pass
 
 

@@ -32,6 +32,7 @@ from buttons import Buttons
 from menu import TopMenu
 from options import Options
 from notes import Notes
+from status import StatusBar
 
 
 
@@ -88,6 +89,9 @@ class GUI(Tk):
         self.buttons = Buttons(self)
         self.buttons.grid(row = 3, column = 0, columnspan = 5, pady = 5)
 
+        self.statusBar = StatusBar(self)
+        self.statusBar.grid(row = 4, column = 0, columnspan = 5, padx = 5, pady = 5, sticky = (E, W))
+ 
         self.mainloop()
 
 

@@ -47,6 +47,7 @@ class FileTree(ttk.Treeview):
         self.bind("<1>", lambda e: self.clicked(e))
         self.bind("<Double-1>", lambda e: self.doubleClick(e))
         self.bind("<3>", lambda e: self.rightClicked(e))
+        self.bind("<<TreeviewSelect>>", self.onSelection)
         self.tag_configure("duplicate", background = "white")
         self.duplicatesShown = False
 
@@ -87,6 +88,10 @@ class FileTree(ttk.Treeview):
                     self.filestorage.files[item]["tags"].remove(column)
             elif not column:
                 self.root.notes.changeFile(item)
+
+
+    def onSelection(self, e):
+        self.root.statusBar.filesSelected(len(self.selection()))
 
                     
     def getTags(self, file):
