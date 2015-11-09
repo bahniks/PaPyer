@@ -21,12 +21,10 @@ along with PaPyer.  If not, see <http://www.gnu.org/licenses/>.
 from tkinter import *
 #from tkinter import messagebox
 from tkinter import ttk
-from collections import OrderedDict
+from collections import OrderedDict, defaultdict
 import os
 import pickle
 
-
-#File = namedtuple("File", ["file", "dir", "tags"])
 
 
 class FileStorage:
@@ -55,8 +53,7 @@ class FileStorage:
             self.loaded = {}
     
     def addFiles(self):
-        unique = {}
-        self.duplicates = set()
+        self.filenames = defaultdict(list)
         base = len(self.root.base) + 1
         count = 1
         for content in os.walk(self.root.base):
@@ -74,12 +71,13 @@ class FileStorage:
                                         "dir": directory[base:],
                                         "tags": tags,
                                         "note": note}
-                    if not file in unique:
-                        unique[file] = path
-                    else:
-                        self.duplicates.add(path)
-                        self.duplicates.add(unique[file])
+                    self.filenames[file].append(path)
                     count += 1
+        self.duplicates = set()
+        for filename, paths in self.filenames.items():
+            if len(paths) > 1:
+                self.duplicates.add(filename)
+                    
 
     def save(self):
         path = os.path.join(os.getcwd(), "papyer.data")
@@ -92,20 +90,26 @@ class FileStorage:
                                    "note": file["note"]}
         with open(path, mode = "wb") as f:
             pickle.dump(store, file = f)
-        
-        
 
 
-
-        
-        
-        
-
-
-
-
+    def removeFile(self, file):
+        info = self.files.pop(file)
+        filename = info["file"]
+        if len(self.filenames[filename]) == 2:
+            self.duplicates.remove(filename)
+        self.filenames[filename].remove(file)
 
 
+    def renameFile(self, old, new):
+        info = self.files.pop(old)
+        filename = info["file"]
+        if len(self.filenames[filename]) == 2:
+            self.duplicates.remove(filename)
+        self.filenames[filename].remove(old)
 
-
-
+        newname = os.path.basename(new)
+        self.files[new] = info
+        self.files[new]["file"] = newname
+        self.filenames[newname].append(new)
+        if len(self.filenames[newname]) == 2:
+            self.duplicates.add(newname)

@@ -86,7 +86,7 @@ class Popup(Toplevel):
         pass
 
     def closeFun(self):
-        pass
+        self.destroy()
 
 
         

@@ -33,6 +33,7 @@ from menu import TopMenu
 from options import Options
 from notes import Notes
 from status import StatusBar
+#from reference import Reference
 
 
 
@@ -45,7 +46,7 @@ class GUI(Tk):
         self.initialized = False
         self.title("Papyer")
         
-        x, y = 800, 300
+        x, y = 1500, 500
         self.minsize(x, y)
         placeWindow(self, x, y)
 
@@ -82,6 +83,10 @@ class GUI(Tk):
         self.notesLab = ttk.Label(text = "Notes")
         self.notesLab.grid(column = 5, row = 1, padx = 5, pady = 2)
 
+        self.scrollNotes = ttk.Scrollbar(self, orient = VERTICAL, command = self.notes.yview)
+        self.scrollNotes.grid(column = 6, row = 2, sticky = (N, S, W))
+        self.notes.configure(yscrollcommand = self.scrollNotes.set)
+
         self.columnconfigure(1, weight = 1)
         self.columnconfigure(3, weight = 1)
         self.rowconfigure(1, weight = 1)
@@ -91,6 +96,11 @@ class GUI(Tk):
 
         self.statusBar = StatusBar(self)
         self.statusBar.grid(row = 4, column = 0, columnspan = 5, padx = 5, pady = 5, sticky = (E, W))
+
+        #self.reference = Reference(self)
+
+        self.bind("<Control-d>", lambda e: self.filetree.keepDuplicates())
+        
  
         self.mainloop()
 

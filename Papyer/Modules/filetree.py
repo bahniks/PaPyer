@@ -23,6 +23,8 @@ from tkinter import ttk
 from collections import OrderedDict
 import os
 
+from menu import Popup
+from window import placeWindow
 
 
 
@@ -34,22 +36,29 @@ class FileTree(ttk.Treeview):
         self.filestorage = self.root.filestorage
         self.options = self.root.options
 
-        self["columns"] = ["directory"] + self.options["tags"]
+        self["columns"] = ["directory", "type", "size"] + self.options["tags"]
         self.column("#0", width = 400, anchor = "w")
         self.heading("#0", text = "Filename", command = self.orderByFilename)
         self.column("directory", width = 300, anchor = "w")
         self.heading("directory", text = "Directory", command = self.orderByDirectory)
+        self.column("type", width = 60, anchor = "w")
+        self.heading("type", text = "Type")
+        self.column("size", width = 60, anchor = "e")
+        self.heading("size", text = "Size")
         for label in self.options["tags"]:
             self.column(label, width = 60, anchor = "center")
             self.heading(label, text = label)
         
-
         self.bind("<1>", lambda e: self.clicked(e))
         self.bind("<Double-1>", lambda e: self.doubleClick(e))
         self.bind("<3>", lambda e: self.rightClicked(e))
+        self.bind("<Delete>", lambda e: self.deleteFile())
         self.bind("<<TreeviewSelect>>", self.onSelection)
         self.tag_configure("duplicate", background = "white")
+        
         self.duplicatesShown = False
+        self.onlyDuplicates = False
+        self.conditions = []
 
         self.initialize()
 
@@ -57,10 +66,17 @@ class FileTree(ttk.Treeview):
     def initialize(self):
         "initializes the treeview containing files"
         for file, info in self.filestorage.items():
-            tags = self.getTags(file)
-            self.insert("", "end", file, text = info["file"], values = (info["dir"], ""), tag = tags)
-            for tag in info["tags"]:
-                self.set(file, tag, "x")
+            for condition in self.conditions:
+                if not condition(file):
+                    break
+            else:
+                tags = self.getTags(file)
+                name, typ = os.path.splitext(info["file"])
+                size = filesize(os.path.getsize(file))
+                self.insert("", "end", file, text = name,
+                            values = (info["dir"], typ[1:], size), tag = tags)
+                for tag in info["tags"]:
+                    self.set(file, tag, "x")
 
 
     def doubleClick(self, event):
@@ -81,35 +97,42 @@ class FileTree(ttk.Treeview):
             column = self.column(self.identify("column", event.x, event.y), "id")
             if column in self.options["tags"]:
                 if not column in self.filestorage.files[item]["tags"]:
-                    self.set(item, column, "x")
-                    self.filestorage.files[item]["tags"].add(column)
+                    for path in self.filestorage.filenames[os.path.basename(item)]:
+                        self.set(path, column, "x")
+                        self.filestorage.files[path]["tags"].add(column)
                 else:
-                    self.set(item, column, "")
-                    self.filestorage.files[item]["tags"].remove(column)
-            elif not column:
-                self.root.notes.changeFile(item)
+                    for path in self.filestorage.filenames[os.path.basename(item)]:
+                        self.set(path, column, "")
+                        try:
+                            self.filestorage.files[path]["tags"].remove(column)
+                        except KeyError:
+                            pass
+            self.root.notes.changeFile(item)
 
+            #self.root.reference.get(self.filestorage.files[item]["file"]) # !
+            
 
     def onSelection(self, e):
         self.root.statusBar.filesSelected(len(self.selection()))
 
                     
     def getTags(self, file):
-        if file in self.filestorage.duplicates:
+        if os.path.basename(file) in self.filestorage.duplicates:
             tags = "duplicate"
         else:
             tags = ""
         return tags    
                 
 
-    def leave(self, letters):
-        self.delete(*self.get_children())
-        for file, info in self.filestorage.items():
-            if info["file"].startswith(letters):
-                tags = self.getTags(file)
-                self.insert("", "end", file, text = info["file"],
-                            values = (info["dir"], ""), tag = tags)
-
+    def leave(self, letters, previous = []):
+        def beginningWith(file):
+            return self.filestorage.files[file]["file"].startswith(letters)
+        if previous:
+            self.conditions.remove(previous.pop(0))
+        self.conditions.append(beginningWith)
+        previous.append(beginningWith)
+        self.refresh()
+        
 
     def toggleDuplicates(self):
         if self.duplicatesShown:
@@ -123,7 +146,7 @@ class FileTree(ttk.Treeview):
     def orderByFilename(self):
         "orders files by filename"
         self.filestorage.files = OrderedDict(sorted(self.filestorage.files.items(),
-                                                    key = lambda i: i[1]["file"]))        
+                                                    key = lambda i: i[1]["file"].lower()))        
         self.refresh() 
 
 
@@ -150,8 +173,9 @@ class FileTree(ttk.Treeview):
                 if item in selected and len(selected) > 1:                                        
                     menu.add_command(label = "Delete files", command = lambda: self.deleteFile())
                 else:
-                    self.selection_set(item.replace("\\", "\\\\"))
+                    self.selection_set('"{}"'.format(item.replace("\\", "\\\\")))
                     menu.add_command(label = "Delete file", command = lambda: self.deleteFile())
+                    menu.add_command(label = "Rename file", command = lambda: self.renameFile())
         menu.post(event.x_root, event.y_root)
 
 
@@ -163,5 +187,59 @@ class FileTree(ttk.Treeview):
         if answ:
             for file in self.selection():
                 os.remove(file)
-                self.filestorage.files.pop(file)
+                self.filestorage.removeFile(file)
         self.refresh()
+
+
+    def renameFile(self):
+        Rename(self.root, self.selection()[0])
+
+
+    def keepDuplicates(self):
+        if self.onlyDuplicates:
+            self.conditions.remove(self.onlyDuplicates)
+            self.onlyDuplicates = None
+        else:
+            self.onlyDuplicates = lambda f: (self.filestorage.files[f]["file"] in
+                                             self.filestorage.duplicates)
+            self.conditions.append(self.onlyDuplicates)
+        self.refresh()
+
+
+
+class Rename(Popup):
+    def __init__(self, root, file):
+        super().__init__(root, "Rename file")
+        placeWindow(self, 598, 208)
+
+        self.file = file
+
+        self.nameVar = StringVar()
+        self.nameVar.set(os.path.splitext(os.path.basename(file))[0])
+        self.name = ttk.Entry(self, textvariable = self.nameVar, width = 50)
+        self.name.grid(column = 2, columnspan = 2, row = 1, sticky = (E, W), pady = 5)
+
+
+    def okFun(self):
+        path, base = os.path.split(self.file)
+        if "." in self.nameVar.get():
+            newname = os.path.join(path, self.nameVar.get())
+        else:
+            newname = os.path.join(path, self.nameVar.get() + os.path.splitext(base)[1])
+        os.rename(self.file, newname)
+        self.root.filestorage.renameFile(self.file, newname)
+        self.root.filetree.refresh()
+        self.destroy()
+
+    
+
+
+
+def filesize(size, remainder = 0, order = 0):
+    sizes = ["B", "KB", "MB", "GB", "TB", "PB", "EB"]
+    if size // 1024 == 0:
+        return "{}{}".format(size, sizes[order])
+    else:
+        return filesize(size // 1024, size % 1024, order + 1)
+
+    

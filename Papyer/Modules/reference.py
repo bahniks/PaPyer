@@ -21,27 +21,26 @@ from tkinter import *
 from tkinter import ttk
 
 import os
+from urllib.request import urlopen
 
 
-class Notes(Text):
+
+class Reference:
     def __init__(self, root):
-        super().__init__(root)
+        pass
+        #super().__init__(root)
         
-        self.root = root
-        self.filestorage = self.root.filestorage
-        self["width"] = 40
+        #self.root = root
+        #self.filestorage = self.root.filestorage
 
-        self.currentFile = None
+    def get(self, file):
+        url = "https://scholar.google.com/scholar?q=It%20Felt%20Fluent,%20and%20I%20Liked%20It"
+        #with urlopen(url) as f:
+        #    for line in f:
+        #        print(f)
+        #print(os.path.splitext(file)[0])
         
-
-    def changeFile(self, file):
-        if self.currentFile:
-            text = self.get("1.0", "end").rstrip()
-            for path in self.filestorage.filenames[os.path.basename(self.currentFile)]:
-                self.filestorage.files[path]["note"] = text
-        self.delete("1.0", "end")
-        self.insert("1.0", self.filestorage.files[file]["note"].rstrip())
-        self.currentFile = file
+        
 
 
 
