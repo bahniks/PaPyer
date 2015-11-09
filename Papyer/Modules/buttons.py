@@ -32,7 +32,15 @@ class Buttons(Frame):
 
         self.duplicatesBut = ttk.Button(self, command = self.duplicates,
                                         text = "Show duplicates", width = 15)
-        self.duplicatesBut.grid(column = 0, row = 0)
+        self.duplicatesBut.grid(column = 1, row = 0)
+        self.refreshBut = ttk.Button(self, command = self.root.refresh,
+                                     text = "Refresh", width = 15)
+        self.refreshBut.grid(column = 2, row = 0)
+
+        self.columnconfigure(0, weight = 2)
+        self.columnconfigure(1, weight = 1)
+        self.columnconfigure(2, weight = 1)
+        self.columnconfigure(3, weight = 2)
 
 
     def duplicates(self):
@@ -41,6 +49,8 @@ class Buttons(Frame):
             self.duplicatesBut["text"] = "Hide duplicates"
         else:
             self.duplicatesBut["text"] = "Show duplicates"
+
+
 
 
 

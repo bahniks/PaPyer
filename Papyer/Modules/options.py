@@ -21,17 +21,18 @@ along with PaPyer.  If not, see <http://www.gnu.org/licenses/>.
 import pickle
 import os
 
+from collections import defaultdict
 
-class Options(dict):
+
+class Options(defaultdict):
     def __init__(self, root):
+        super().__init__(list)
         path = os.path.join(os.getcwd(), "papyer.options")
         if os.path.exists(path):
             with open(path, mode = "rb") as f:
                 content = pickle.load(f)
                 for key, value in content.items():
                     self[key] = value
-        else:
-            self["tags"] = []
            
 
     def save(self):

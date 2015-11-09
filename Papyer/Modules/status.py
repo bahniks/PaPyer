@@ -33,20 +33,26 @@ class StatusBar(Frame):
         self.numberOfFiles = ttk.Label(self)
         self.numberOfFiles.grid(column = 0, row = 0, padx = 10, sticky = W)
 
-        self.selectedFiles = ttk.Label(self, text = "Number of selected files: 0")
-        self.selectedFiles.grid(column = 1, row = 0, sticky = W)
+        self.shownFiles = ttk.Label(self, text = "Shown files: 0")
+        self.shownFiles.grid(column = 1, row = 0, padx = 10, sticky = W)
 
-        self.columnconfigure(1, weight = 1)
+        self.selectedFiles = ttk.Label(self, text = "Selected files: 0")
+        self.selectedFiles.grid(column = 2, row = 0, padx = 10, sticky = W)
+
+        self.columnconfigure(2, weight = 1)
 
         self.filesChanged()
+        self.shownChanged()
 
         
     def filesChanged(self):
-        self.numberOfFiles["text"] = "Number of files: {}".format(len(self.filestorage.files))
+        self.numberOfFiles["text"] = "All files: {}".format(len(self.filestorage.files))
 
+    def shownChanged(self):
+        self.shownFiles["text"] = "Shown files: {}".format(len(self.root.filetree.get_children()))
 
-    def filesSelected(self, number):
-        self.selectedFiles["text"] = "Number of selected files: {}".format(number)
+    def filesSelected(self):
+        self.selectedFiles["text"] = "Selected files: {}".format(len(self.root.filetree.selection()))
 
         
 

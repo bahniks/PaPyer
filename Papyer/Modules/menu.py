@@ -34,6 +34,9 @@ class TopMenu(Menu):
         self.menuOptions = Menu(self)
         self.menuAbout = Menu(self)
 
+        self.capitalizationVar = BooleanVar()
+        self.capitalizationVar.set(self.root.options["capitalization"])
+
         menuWidth = 8
         self.add_cascade(menu = self.menuFile, label = "{:^{}}".format("File", menuWidth))
         self.add_cascade(menu = self.menuOptions, label = "{:^{}}".format("Options", menuWidth))
@@ -44,14 +47,20 @@ class TopMenu(Menu):
         self.menuOptions.add_command(label = "Change tags", command = self.changeTags)
         self.menuOptions.add_separator()
         self.menuOptions.add_command(label = "Settings", command = self.openSettings)
+        self.menuOptions.add_separator()
+        self.menuOptions.add_checkbutton(label = "Ignore capitalization", command = self.capitalization,
+                                         variable = self.capitalizationVar) 
 
         self.menuAbout.add_command(label = "About", command = self.about)
         self.menuAbout.add_command(label = "Version", command = self.version)
 
 
     def changeTags(self):
-        tags = Tags(self.root)        
+        tags = Tags(self.root)
 
+    def capitalization(self):
+        self.update()
+        self.root.options["capitalization"] = not self.capitalizationVar.get()
 
     def openSettings(self):
         pass

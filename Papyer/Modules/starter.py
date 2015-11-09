@@ -50,8 +50,9 @@ class GUI(Tk):
         self.minsize(x, y)
         placeWindow(self, x, y)
 
-        self["menu"] = TopMenu(self)
+
         self.options = Options(self)
+        self["menu"] = TopMenu(self)        
 
         self.protocol("WM_DELETE_WINDOW", self.closeFun)
 
@@ -92,19 +93,35 @@ class GUI(Tk):
         self.rowconfigure(1, weight = 1)
 
         self.buttons = Buttons(self)
-        self.buttons.grid(row = 3, column = 0, columnspan = 5, pady = 5)
+        self.buttons.grid(row = 3, column = 0, columnspan = 5, pady = 5, sticky = (E, W))
 
         self.statusBar = StatusBar(self)
         self.statusBar.grid(row = 4, column = 0, columnspan = 5, padx = 5, pady = 5, sticky = (E, W))
 
-        #self.reference = Reference(self)
+
+        self.columnconfigure(1, weight = 1)
+        self.columnconfigure(3, weight = 1)
+        self.columnconfigure(5, weight = 1)
 
         self.bind("<Control-d>", lambda e: self.filetree.keepDuplicates())
+        self.bind("<Control-a>", lambda e: self.filetree.selectAll())
         
  
         self.mainloop()
 
 
+
+    def refresh(self):
+        # do in a smarter way - check changes in the files
+        self.filestorage.save()
+        self.filestorage = FileStorage(self)
+        self.filetree = FileTree(self)
+        self.filetree.grid(column = 0, row = 1, rowspan = 2, sticky = (N, S, E, W), columnspan = 4)
+        self.notes = Notes(self)
+        self.notes.grid(column = 5, row = 2, sticky = (N, S, E, W), padx = 5)
+        self.statusBar = StatusBar(self)
+        self.statusBar.grid(row = 4, column = 0, columnspan = 5, padx = 5, pady = 5, sticky = (E, W))
+        
 
     def closeFun(self):
         "ask for saving files on exit"

@@ -51,6 +51,7 @@ class FileTree(ttk.Treeview):
         
         self.bind("<1>", lambda e: self.clicked(e))
         self.bind("<Double-1>", lambda e: self.doubleClick(e))
+        self.bind("<Control-a>", lambda e: self.selectAll())
         self.bind("<3>", lambda e: self.rightClicked(e))
         self.bind("<Delete>", lambda e: self.deleteFile())
         self.bind("<<TreeviewSelect>>", self.onSelection)
@@ -113,7 +114,11 @@ class FileTree(ttk.Treeview):
             
 
     def onSelection(self, e):
-        self.root.statusBar.filesSelected(len(self.selection()))
+        self.root.statusBar.filesSelected()
+
+
+    def selectAll(self):
+        self.selection_set(self.get_children())
 
                     
     def getTags(self, file):
@@ -126,7 +131,10 @@ class FileTree(ttk.Treeview):
 
     def leave(self, letters, previous = []):
         def beginningWith(file):
-            return self.filestorage.files[file]["file"].startswith(letters)
+            if self.options["capitalization"]:
+                return self.filestorage.files[file]["file"].startswith(letters)
+            else:
+                return self.filestorage.files[file]["file"].lower().startswith(letters.lower())
         if previous:
             self.conditions.remove(previous.pop(0))
         self.conditions.append(beginningWith)
@@ -160,6 +168,8 @@ class FileTree(ttk.Treeview):
     def refresh(self):
         self.delete(*self.get_children())
         self.initialize()
+        self.root.statusBar.shownChanged()
+        self.root.statusBar.filesSelected()
 
 
     def rightClicked(self, event):
