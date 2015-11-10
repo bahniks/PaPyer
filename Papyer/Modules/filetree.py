@@ -77,7 +77,8 @@ class FileTree(ttk.Treeview):
                 self.insert("", "end", file, text = name,
                             values = (info["dir"], typ[1:], size), tag = tags)
                 for tag in info["tags"]:
-                    self.set(file, tag, "x")
+                    if tag in self.options["tags"]:
+                        self.set(file, tag, "x")
 
 
     def doubleClick(self, event):
@@ -109,6 +110,7 @@ class FileTree(ttk.Treeview):
                         except KeyError:
                             pass
             self.root.notes.changeFile(item)
+            self.root.tags.changeFile(item)
 
             #self.root.reference.get(self.filestorage.files[item]["file"]) # !
             

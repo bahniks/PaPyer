@@ -33,7 +33,7 @@ from menu import TopMenu
 from options import Options
 from notes import Notes
 from status import StatusBar
-#from reference import Reference
+from tags import Tags
 
 
 
@@ -72,36 +72,38 @@ class GUI(Tk):
 
         self.filestorage = FileStorage(self)
         self.filetree = FileTree(self)
-        self.filetree.grid(column = 0, row = 1, rowspan = 2, sticky = (N, S, E, W), columnspan = 4)
+        self.filetree.grid(column = 0, row = 1, rowspan = 4, sticky = (N, S, E, W), columnspan = 4)
 
         self.scrollbar = ttk.Scrollbar(self, orient = VERTICAL, command = self.filetree.yview)
-        self.scrollbar.grid(column = 4, row = 1, rowspan = 2,sticky = (N, S, E))
+        self.scrollbar.grid(column = 4, row = 1, rowspan = 4, sticky = (N, S, E))
         self.filetree.configure(yscrollcommand = self.scrollbar.set)
 
+        self.tags = Tags(self)
+        self.tags.grid(column = 5, row = 2, sticky = (E, W), padx = 5)
+
+        self.tagsLab = ttk.Label(text = "Tags")
+        self.tagsLab.grid(column = 5, row = 1, padx = 5, pady = 2)
+
         self.notes = Notes(self)
-        self.notes.grid(column = 5, row = 2, sticky = (N, S, E, W), padx = 5)
+        self.notes.grid(column = 5, row = 4, sticky = (N, S, E, W), padx = 5)
 
         self.notesLab = ttk.Label(text = "Notes")
-        self.notesLab.grid(column = 5, row = 1, padx = 5, pady = 2)
+        self.notesLab.grid(column = 5, row = 3, padx = 5, pady = 2)
 
         self.scrollNotes = ttk.Scrollbar(self, orient = VERTICAL, command = self.notes.yview)
-        self.scrollNotes.grid(column = 6, row = 2, sticky = (N, S, W))
+        self.scrollNotes.grid(column = 6, row = 4, sticky = (N, S, W))
         self.notes.configure(yscrollcommand = self.scrollNotes.set)
 
-        self.columnconfigure(1, weight = 1)
-        self.columnconfigure(3, weight = 1)
-        self.rowconfigure(1, weight = 1)
-
         self.buttons = Buttons(self)
-        self.buttons.grid(row = 3, column = 0, columnspan = 5, pady = 5, sticky = (E, W))
+        self.buttons.grid(row = 5, column = 0, columnspan = 5, pady = 5, sticky = (E, W))
 
         self.statusBar = StatusBar(self)
-        self.statusBar.grid(row = 4, column = 0, columnspan = 5, padx = 5, pady = 5, sticky = (E, W))
-
+        self.statusBar.grid(row = 6, column = 0, columnspan = 5, padx = 5, pady = 5, sticky = (E, W))
 
         self.columnconfigure(1, weight = 1)
         self.columnconfigure(3, weight = 1)
         self.columnconfigure(5, weight = 1)
+        self.rowconfigure(4, weight = 1)
 
         self.bind("<Control-d>", lambda e: self.filetree.keepDuplicates())
         self.bind("<Control-a>", lambda e: self.filetree.selectAll())
@@ -117,10 +119,12 @@ class GUI(Tk):
         self.filestorage = FileStorage(self)
         self.filetree = FileTree(self)
         self.filetree.grid(column = 0, row = 1, rowspan = 2, sticky = (N, S, E, W), columnspan = 4)
+        self.tags = Tags(self)
+        self.tags.grid(column = 5, row = 2, sticky = (E, W), padx = 5)
         self.notes = Notes(self)
-        self.notes.grid(column = 5, row = 2, sticky = (N, S, E, W), padx = 5)
+        self.notes.grid(column = 5, row = 4, sticky = (N, S, E, W), padx = 5)
         self.statusBar = StatusBar(self)
-        self.statusBar.grid(row = 4, column = 0, columnspan = 5, padx = 5, pady = 5, sticky = (E, W))
+        self.statusBar.grid(row = 6, column = 0, columnspan = 5, padx = 5, pady = 5, sticky = (E, W))
         
 
     def closeFun(self):
