@@ -34,23 +34,40 @@ class Tags(ttk.Entry):
         self["width"] = 40
         self["textvariable"] = self.var
         self["state"] = "disabled"
+
+        self.bind("<Tab>", lambda e: self.complete())
         
 
     def changeFile(self, file):
         self["state"] = "!disabled"
         if self.currentFile:
             tags = {tag.strip() for tag in self.var.get().split(",") if tag.strip()}
+            labels = {label for label in self.root.options["tags"] if
+                      label in self.filestorage.files[self.currentFile]["tags"]}
+            tags |= labels
             for path in self.filestorage.filenames[os.path.basename(self.currentFile)]:
                 self.filestorage.files[path]["tags"] = tags
-            for tag in self.root.options["tags"]:
-                if tag in tags:
-                    self.root.filetree.set(self.currentFile, tag, "x")
-                else:
-                    self.root.filetree.set(self.currentFile, tag, "")
-        labels = [lab.lower() for lab in self.root.options["tags"]]
-        new = [tag for tag in self.filestorage.files[file]["tags"] if tag.lower() not in labels]
+                for tag in self.root.options["tags"]:
+                    if tag in tags:
+                        self.root.filetree.set(path, tag, "x")
+                    else:
+                        self.root.filetree.set(path, tag, "")
+                    
+        new = [tag for tag in self.filestorage.files[file]["tags"] if tag not in self.root.options["tags"]]
         self.var.set(", ".join(sorted(new)))
         self.currentFile = file
+
+
+    def complete(self):
+        last = self.var.get().split(",")[-1].lstrip()
+        if last:
+            tags = self.filestorage.getAllTags()
+            fit = [tag for tag in tags if tag.startswith(last)]
+            if len(fit) == 1:
+                new = self.var.get()[0:-len(last)] + fit[0] + ", "
+                self.var.set(new)
+                self.icursor(len(self.var.get()))
+        return "break"
 
 
 

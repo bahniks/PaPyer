@@ -30,11 +30,12 @@ class Notes(Text):
         self.root = root
         self.filestorage = self.root.filestorage
         self["width"] = 40
-
+        self["state"] = "disabled"
         self.currentFile = None
         
 
     def changeFile(self, file):
+        self["state"] = "normal"
         if self.currentFile:
             text = self.get("1.0", "end").rstrip()
             for path in self.filestorage.filenames[os.path.basename(self.currentFile)]:

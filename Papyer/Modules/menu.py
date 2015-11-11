@@ -44,7 +44,7 @@ class TopMenu(Menu):
 
         self.menuFile.add_command(label = "Close", command = self.root.closeFun)
 
-        self.menuOptions.add_command(label = "Change tags", command = self.changeTags)
+        self.menuOptions.add_command(label = "Add label", command = self.addLabel)
         self.menuOptions.add_separator()
         self.menuOptions.add_command(label = "Settings", command = self.openSettings)
         self.menuOptions.add_separator()
@@ -55,8 +55,8 @@ class TopMenu(Menu):
         self.menuAbout.add_command(label = "Version", command = self.version)
 
 
-    def changeTags(self):
-        tags = Tags(self.root)
+    def addLabel(self):
+        Labels(self.root)
 
     def capitalization(self):
         self.update()
@@ -99,10 +99,23 @@ class Popup(Toplevel):
 
 
         
-class Tags(Popup):
+class Labels(Popup):
     def __init__(self, root):
-        super().__init__(root, "Change tags")
+        super().__init__(root, "Add label")
         placeWindow(self, 598, 208)
+
+        self.var = StringVar()
+        tags = [tag for tag in tuple(sorted(self.root.filestorage.getAllTags())) if
+                tag not in self.root.options["tags"]]
+        self.combo = ttk.Combobox(self, textvariable = self.var, values = tags)
+        self.combo.grid(column = 2, columnspan = 2, row = 1)
+
+    def okFun(self):
+        new = self.var.get()
+        if new:
+            self.root.options["tags"].append(new)
+            self.root.refresh()
+        self.destroy()
         
 
 

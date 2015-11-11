@@ -113,3 +113,10 @@ class FileStorage:
         self.filenames[newname].append(new)
         if len(self.filenames[newname]) == 2:
             self.duplicates.add(newname)
+
+
+    def getAllTags(self):
+        tags = set()
+        for values in self.files.values():
+            tags |= values["tags"]
+        return tags

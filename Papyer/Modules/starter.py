@@ -118,7 +118,7 @@ class GUI(Tk):
         self.filestorage.save()
         self.filestorage = FileStorage(self)
         self.filetree = FileTree(self)
-        self.filetree.grid(column = 0, row = 1, rowspan = 2, sticky = (N, S, E, W), columnspan = 4)
+        self.filetree.grid(column = 0, row = 1, rowspan = 4, sticky = (N, S, E, W), columnspan = 4)
         self.tags = Tags(self)
         self.tags.grid(column = 5, row = 2, sticky = (E, W), padx = 5)
         self.notes = Notes(self)
