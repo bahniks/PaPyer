@@ -59,12 +59,34 @@ class GUI(Tk):
         self.base = os.getcwd()
 
         self.selectVar = StringVar()
+        self.searchVar = StringVar()
+
+        self.createWidgets()
+
+        self.columnconfigure(1, weight = 1)
+        self.columnconfigure(3, weight = 1)
+        self.columnconfigure(5, weight = 1)
+        self.rowconfigure(4, weight = 1)
+
+        self.bind("<Control-d>", lambda e: self.filetree.keepDuplicates())
+        self.bind("<Control-a>", lambda e: self.filetree.selectAll())
+        
+        self.mainloop()
+
+
+
+    def refresh(self):
+        # do in a smarter way - check changes in the files
+        self.filestorage.save()
+        self.createWidgets()
+
+
+    def createWidgets(self):
         self.selectLabel = ttk.Label(self, text = "Select:")
         self.selectLabel.grid(column = 0, row = 0, padx = 10, pady = 5)
         self.select = Select(self, textvariable = self.selectVar)
         self.select.grid(column = 1, row = 0, sticky = (E, W))
 
-        self.searchVar = StringVar()
         self.searchLabel = ttk.Label(self, text = "Search:")
         self.searchLabel.grid(column = 2, row = 0, padx = 10, pady = 5)
         self.search = ttk.Entry(self, textvariable = self.searchVar)
@@ -98,33 +120,7 @@ class GUI(Tk):
         self.buttons.grid(row = 5, column = 0, columnspan = 5, pady = 5, sticky = (E, W))
 
         self.statusBar = StatusBar(self)
-        self.statusBar.grid(row = 6, column = 0, columnspan = 5, padx = 5, pady = 5, sticky = (E, W))
-
-        self.columnconfigure(1, weight = 1)
-        self.columnconfigure(3, weight = 1)
-        self.columnconfigure(5, weight = 1)
-        self.rowconfigure(4, weight = 1)
-
-        self.bind("<Control-d>", lambda e: self.filetree.keepDuplicates())
-        self.bind("<Control-a>", lambda e: self.filetree.selectAll())
-        
- 
-        self.mainloop()
-
-
-
-    def refresh(self):
-        # do in a smarter way - check changes in the files
-        self.filestorage.save()
-        self.filestorage = FileStorage(self)
-        self.filetree = FileTree(self)
-        self.filetree.grid(column = 0, row = 1, rowspan = 4, sticky = (N, S, E, W), columnspan = 4)
-        self.tags = Tags(self)
-        self.tags.grid(column = 5, row = 2, sticky = (E, W), padx = 5)
-        self.notes = Notes(self)
-        self.notes.grid(column = 5, row = 4, sticky = (N, S, E, W), padx = 5)
-        self.statusBar = StatusBar(self)
-        self.statusBar.grid(row = 6, column = 0, columnspan = 5, padx = 5, pady = 5, sticky = (E, W))
+        self.statusBar.grid(row = 6, column = 0, columnspan = 5, padx = 5, pady = 5, sticky = (E, W))        
         
 
     def closeFun(self):

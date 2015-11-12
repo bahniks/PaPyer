@@ -55,11 +55,13 @@ class FileTree(ttk.Treeview):
         self.bind("<3>", lambda e: self.rightClicked(e))
         self.bind("<Delete>", lambda e: self.deleteFile())
         self.bind("<<TreeviewSelect>>", self.onSelection)
+        
         self.tag_configure("duplicate", background = "white")
         
         self.duplicatesShown = False
         self.onlyDuplicates = False
         self.conditions = []
+        self.filters = {}
 
         self.initialize()
 
@@ -95,8 +97,9 @@ class FileTree(ttk.Treeview):
 
     def clicked(self, event):
         item = self.identify("item", event.x, event.y)
+        region = self.identify("region", event.x, event.y)
+        column = self.column(self.identify("column", event.x, event.y), "id")
         if item:
-            column = self.column(self.identify("column", event.x, event.y), "id")
             if column in self.options["tags"]:
                 if not column in self.filestorage.files[item]["tags"]:
                     for path in self.filestorage.filenames[os.path.basename(item)]:
@@ -111,14 +114,47 @@ class FileTree(ttk.Treeview):
                             pass
             self.root.notes.changeFile(item)
             self.root.tags.changeFile(item)           
-        
+        elif region == "heading":
+            if column in self.options["tags"]:
+                self.orderByTag(column)
+                
+
+    def rightClicked(self, event):
+        "called when tree item is right-clicked on"
+        item = self.identify("item", event.x, event.y)
+        region = self.identify("region", event.x, event.y)
+        menu = Menu(self, tearoff = 0)
+        column = self.column(self.identify("column", event.x, event.y), "id")
+        if item:
+            if not column:
+                selected = self.selection()
+                if item in selected and len(selected) > 1:                                        
+                    menu.add_command(label = "Delete files", command = lambda: self.deleteFile())
+                else:
+                    self.selection_set('"{}"'.format(item.replace("\\", "\\\\")))
+                    menu.add_command(label = "Delete file", command = lambda: self.deleteFile())
+                    menu.add_command(label = "Rename file", command = lambda: self.renameFile())
+        elif region == "heading":
+            if column in self.options["tags"]:
+                if column not in self.filters:
+                    menu.add_command(label = "Leave only tagged", command = lambda: self.leaveTagged(column))
+                else:
+                    menu.add_command(label = "Show all", command = lambda: self.leaveTagged(column))
+                menu.add_command(label = "Remove column", command = lambda: self.removeLabel(column))
+        else:
+            return
+        menu.post(event.x_root, event.y_root)        
+
 
     def onSelection(self, e):
         self.root.statusBar.filesSelected()
 
 
     def selectAll(self):
-        self.selection_set(self.get_children())
+        if len(self.selection()) == len(self.get_children()):
+            self.selection_remove(self.get_children())
+        else:
+            self.selection_set(self.get_children())
 
                     
     def getTags(self, file):
@@ -139,6 +175,16 @@ class FileTree(ttk.Treeview):
             self.conditions.remove(previous.pop(0))
         self.conditions.append(beginningWith)
         previous.append(beginningWith)
+        self.refresh()
+
+
+    def leaveTagged(self, tag):
+        if tag not in self.filters:
+            fun = lambda file: tag in self.filestorage.files[file]["tags"]
+            self.conditions.append(fun)
+            self.filters[tag] = fun
+        else:
+            self.conditions.remove(self.filters.pop(tag))
         self.refresh()
         
 
@@ -165,6 +211,12 @@ class FileTree(ttk.Treeview):
         self.refresh()
 
 
+    def orderByTag(self, tag):
+        self.filestorage.files = OrderedDict(reversed(sorted(self.filestorage.files.items(),
+                                                             key = lambda i: tag in i[1]["tags"])))
+        self.refresh()        
+
+
     def refresh(self):
         self.delete(*self.get_children())
         self.initialize()
@@ -172,34 +224,10 @@ class FileTree(ttk.Treeview):
         self.root.statusBar.filesSelected()
 
 
-    def rightClicked(self, event):
-        "called when tree item is right-clicked on"
-        item = self.identify("item", event.x, event.y)
-        region = self.identify("region", event.x, event.y)
-        menu = Menu(self, tearoff = 0)
-        column = self.column(self.identify("column", event.x, event.y), "id")
-        if item:
-            if not column:
-                selected = self.selection()
-                if item in selected and len(selected) > 1:                                        
-                    menu.add_command(label = "Delete files", command = lambda: self.deleteFile())
-                else:
-                    self.selection_set('"{}"'.format(item.replace("\\", "\\\\")))
-                    menu.add_command(label = "Delete file", command = lambda: self.deleteFile())
-                    menu.add_command(label = "Rename file", command = lambda: self.renameFile())
-        elif region == "heading":
-            if column in self.options["tags"]:
-                menu.add_command(label = "Remove column", command = lambda: self.removeLabel(column))
-        else:
-            return
-        menu.post(event.x_root, event.y_root)
-
-
     def removeLabel(self, label):
         self.root.options["tags"].remove(label)
         self.root.refresh()
-        
-        
+               
 
     def deleteFile(self):
         plural = "s" if len(self.selection()) > 1 else ""
