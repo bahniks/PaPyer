@@ -47,11 +47,12 @@ class Tags(ttk.Entry):
             tags |= labels
             for path in self.filestorage.filenames[os.path.basename(self.currentFile)]:
                 self.filestorage.files[path]["tags"] = tags
-                for tag in self.root.options["tags"]:
-                    if tag in tags:
-                        self.root.filetree.set(path, tag, "x")
-                    else:
-                        self.root.filetree.set(path, tag, "")
+                if path in self.root.filetree.get_children():                    
+                    for tag in self.root.options["tags"]:
+                        if tag in tags:
+                            self.root.filetree.set(path, tag, "x")
+                        else:
+                            self.root.filetree.set(path, tag, "")
                     
         new = [tag for tag in self.filestorage.files[file]["tags"] if tag not in self.root.options["tags"]]
         self.var.set(", ".join(sorted(new)))

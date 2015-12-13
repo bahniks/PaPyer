@@ -37,16 +37,22 @@ class FileTree(ttk.Treeview):
         self.options = self.root.options
 
         self["columns"] = ["directory", "type", "size"] + self.options["tags"]
-        self.column("#0", width = 400, anchor = "w")
+        if not self.options["columnwidths"]:
+            self.options["columnwidths"] = {tag:60 for tag in self.options["tags"]}
+            self.options["columnwidths"]["#0"] = 400
+            self.options["columnwidths"]["directory"] = 300
+            self.options["columnwidths"]["type"] = 60
+            self.options["columnwidths"]["size"] = 60
+        self.column("#0", width = self.options["columnwidths"]["#0"], anchor = "w")
         self.heading("#0", text = "Filename", command = self.orderByFilename)
-        self.column("directory", width = 300, anchor = "w")
+        self.column("directory", width = self.options["columnwidths"]["directory"], anchor = "w")
         self.heading("directory", text = "Directory", command = self.orderByDirectory)
-        self.column("type", width = 60, anchor = "w")
+        self.column("type", width = self.options["columnwidths"]["type"], anchor = "w")
         self.heading("type", text = "Type")
-        self.column("size", width = 60, anchor = "e")
+        self.column("size", width = self.options["columnwidths"]["size"], anchor = "e")
         self.heading("size", text = "Size")
         for label in self.options["tags"]:
-            self.column(label, width = 60, anchor = "center")
+            self.column(label, width = self.options["columnwidths"][label], anchor = "center")
             self.heading(label, text = label)
         
         self.bind("<1>", lambda e: self.clicked(e))
@@ -62,8 +68,17 @@ class FileTree(ttk.Treeview):
         self.onlyDuplicates = False
         self.conditions = []
         self.filters = {}
+        self.ordering = None
 
         self.initialize()
+
+
+    def saveSettings(self):
+        for col in self.options["tags"] + ["#0", "directory", "type", "size"]:
+            try:
+                self.options["columnwidths"][col] = self.column(col, "width")
+            except Exception:
+                pass
 
 
     def initialize(self):
@@ -113,7 +128,7 @@ class FileTree(ttk.Treeview):
                         except KeyError:
                             pass
             self.root.notes.changeFile(item)
-            self.root.tags.changeFile(item)           
+            self.root.tags.changeFile(item)
         elif region == "heading":
             if column in self.options["tags"]:
                 self.orderByTag(column)
@@ -200,8 +215,9 @@ class FileTree(ttk.Treeview):
     def orderByFilename(self):
         "orders files by filename"
         self.filestorage.files = OrderedDict(sorted(self.filestorage.files.items(),
-                                                    key = lambda i: i[1]["file"].lower()))        
-        self.refresh() 
+                                                    key = lambda i: i[1]["file"].lower()))     
+        self.refresh()
+        self.ordering = self.orderByFilename
 
 
     def orderByDirectory(self):
@@ -209,20 +225,29 @@ class FileTree(ttk.Treeview):
         self.filestorage.files = OrderedDict(sorted(self.filestorage.files.items(),
                                                     key = lambda i: i[1]["dir"]))
         self.refresh()
+        self.ordering = self.orderByDirectory
 
 
     def orderByTag(self, tag):
         self.filestorage.files = OrderedDict(reversed(sorted(self.filestorage.files.items(),
                                                              key = lambda i: tag in i[1]["tags"])))
-        self.refresh()        
+        self.refresh()
+        self.ordering = lambda: self.orderByTag(tag)
 
 
     def refresh(self):
+        selected = self.selection()
         self.delete(*self.get_children())
         self.initialize()
         self.root.statusBar.shownChanged()
         self.root.statusBar.filesSelected()
-
+        if self.ordering:
+            temp = self.ordering
+            self.ordering = None
+            temp()
+        if len(selected) == 1 and selected[0] in self.get_children():
+            self.selection_set('"{}"'.format(selected[0].replace("\\", "\\\\")))
+            
 
     def removeLabel(self, label):
         self.root.options["tags"].remove(label)

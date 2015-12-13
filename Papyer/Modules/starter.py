@@ -49,8 +49,7 @@ class GUI(Tk):
         x, y = 1500, 500
         self.minsize(x, y)
         placeWindow(self, x, y)
-
-
+        
         self.options = Options(self)
         self["menu"] = TopMenu(self)        
 
@@ -78,7 +77,10 @@ class GUI(Tk):
     def refresh(self):
         # do in a smarter way - check changes in the files
         self.filestorage.save()
+        self.filetree.saveSettings()
+        selected = self.filetree.selection()
         self.createWidgets()
+        self.filetree.selection_set(selected)
 
 
     def createWidgets(self):
@@ -125,6 +127,7 @@ class GUI(Tk):
 
     def closeFun(self):
         "ask for saving files on exit"
+        self.filetree.saveSettings()
         self.filestorage.save()
         self.options.save()
         self.destroy()

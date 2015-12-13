@@ -114,6 +114,7 @@ class Labels(Popup):
         new = self.var.get()
         if new:
             self.root.options["tags"].append(new)
+            self.root.options["columnwidths"][new] = 60
             self.root.refresh()
         self.destroy()
         
