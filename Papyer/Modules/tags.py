@@ -36,6 +36,8 @@ class Tags(ttk.Entry):
         self["state"] = "disabled"
 
         self.bind("<Tab>", lambda e: self.complete())
+        self.bind("<KeyPress>", self.note)
+        self.bind("<KeyRelease>", self.autocomplete)
         
 
     def changeFile(self, file):
@@ -68,8 +70,27 @@ class Tags(ttk.Entry):
                 new = self.var.get()[0:-len(last)] + fit[0] + ", "
                 self.var.set(new)
                 self.icursor(len(self.var.get()))
+                self.selection_clear()
         return "break"
 
+
+    def note(self, e):
+        self.currentIndex = len(self.var.get())
+        if self.selection_present():            
+            self.currentIndex -= len(self.selection_get())
+
+
+    def autocomplete(self, e):
+        last = self.var.get().split(",")[-1].lstrip()
+        if last:
+            tags = self.filestorage.getAllTags()
+            fit = [tag for tag in tags if tag.startswith(last)]
+            newIndex = self.index("")
+            if len(fit) == 1 and newIndex - 1 == self.currentIndex:
+                new = self.var.get()[0:-len(last)] + fit[0]
+                self.var.set(new)
+                self.selection_range(newIndex, len(new))
+                self.icursor(newIndex)
 
 
 
