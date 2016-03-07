@@ -193,6 +193,19 @@ class FileTree(ttk.Treeview):
         self.refresh()
 
 
+    def find(self, letters, previous = []):
+        def search(file):
+            if self.options["capitalization"]:
+                return letters in self.filestorage.files[file]["file"]
+            else:
+                return letters.lower() in self.filestorage.files[file]["file"].lower()
+        if previous:
+            self.conditions.remove(previous.pop(0))
+        self.conditions.append(search)
+        previous.append(search)
+        self.refresh()
+
+
     def leaveTagged(self, tag):
         if tag not in self.filters:
             fun = lambda file: tag in self.filestorage.files[file]["tags"]

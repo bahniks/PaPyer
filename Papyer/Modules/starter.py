@@ -28,6 +28,7 @@ from window import placeWindow
 from filestorage import FileStorage
 from filetree import FileTree
 from selection import Select
+from search import Search
 from buttons import Buttons
 from menu import TopMenu
 from options import Options
@@ -91,7 +92,7 @@ class GUI(Tk):
 
         self.searchLabel = ttk.Label(self, text = "Search:")
         self.searchLabel.grid(column = 2, row = 0, padx = 10, pady = 5)
-        self.search = ttk.Entry(self, textvariable = self.searchVar)
+        self.search = Search(self, textvariable = self.searchVar)
         self.search.grid(column = 3, row = 0, sticky = (E, W))
 
         self.filestorage = FileStorage(self)
