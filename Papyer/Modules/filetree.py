@@ -146,9 +146,21 @@ class FileTree(ttk.Treeview):
                 if item in selected and len(selected) > 1:                                        
                     menu.add_command(label = "Delete files", command = lambda: self.deleteFile())
                 else:
-                    self.selection_set('"{}"'.format(item.replace("\\", "\\\\")))
+                    self.selection_set(item)
                     menu.add_command(label = "Delete file", command = lambda: self.deleteFile())
                     menu.add_command(label = "Rename file", command = lambda: self.renameFile())
+            elif column == "directory":
+                self.selection_set(item)
+                directory = os.path.dirname(item)
+                menu.add_command(label = "Select all from a directory",
+                                 command = lambda: self.selectDirectory(directory))
+            elif column in self.options["tags"]:
+                selected = self.selection()
+                if item in selected and len(selected) > 1:                                        
+                    menu.add_command(label = "Tag files", command = lambda: self.tagFiles(column))
+                else:
+                    self.selection_set(item)
+                    menu.add_command(label = "Tag file", command = lambda: self.tagFiles(column))
         elif region == "heading":
             if column in self.options["tags"]:
                 if column not in self.filters:
@@ -158,7 +170,21 @@ class FileTree(ttk.Treeview):
                 menu.add_command(label = "Remove column", command = lambda: self.removeLabel(column))
         else:
             return
-        menu.post(event.x_root, event.y_root)        
+        menu.post(event.x_root, event.y_root)
+
+
+    def tagFiles(self, column):
+        for item in self.selection():
+            if not column in self.filestorage.files[item]["tags"]:
+                for path in self.filestorage.filenames[os.path.basename(item)]:
+                    self.set(path, column, "x")
+                    self.filestorage.files[path]["tags"].add(column)
+            self.root.notes.changeFile(item)
+            self.root.tags.changeFile(item)            
+
+
+    def selectDirectory(self, directory):
+        self.selection_set([file for file in self.get_children() if os.path.dirname(file) == directory])
 
 
     def onSelection(self, e):
