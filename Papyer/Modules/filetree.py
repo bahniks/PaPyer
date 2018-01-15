@@ -21,6 +21,7 @@ from tkinter import *
 from tkinter import messagebox
 from tkinter import ttk
 from collections import OrderedDict
+from time import strftime, gmtime
 import os
 
 from menu import Popup
@@ -36,13 +37,14 @@ class FileTree(ttk.Treeview):
         self.filestorage = self.root.filestorage
         self.options = self.root.options
 
-        self["columns"] = ["directory", "type", "size"] + self.options["tags"]
+        self["columns"] = ["directory", "type", "size", "date"] + self.options["tags"]
         if not self.options["columnwidths"]:
             self.options["columnwidths"] = {tag:60 for tag in self.options["tags"]}
             self.options["columnwidths"]["#0"] = 400
             self.options["columnwidths"]["directory"] = 300
-            self.options["columnwidths"]["type"] = 60
-            self.options["columnwidths"]["size"] = 60
+            self.options["columnwidths"]["type"] = 40
+            self.options["columnwidths"]["size"] = 40
+            self.options["columnwidths"]["date"] = 120
         self.column("#0", width = self.options["columnwidths"]["#0"], anchor = "w")
         self.heading("#0", text = "Filename", command = self.orderByFilename)
         self.column("directory", width = self.options["columnwidths"]["directory"], anchor = "w")
@@ -51,6 +53,8 @@ class FileTree(ttk.Treeview):
         self.heading("type", text = "Type")
         self.column("size", width = self.options["columnwidths"]["size"], anchor = "e")
         self.heading("size", text = "Size")
+        self.column("date", width = self.options["columnwidths"]["date"], anchor = "e")
+        self.heading("date", text = "Date", command = self.orderByDate)
         for label in self.options["tags"]:
             self.column(label, width = self.options["columnwidths"][label], anchor = "center")
             self.heading(label, text = label)
@@ -74,7 +78,7 @@ class FileTree(ttk.Treeview):
 
 
     def saveSettings(self):
-        for col in self.options["tags"] + ["#0", "directory", "type", "size"]:
+        for col in self.options["tags"] + ["#0", "directory", "type", "size", "date"]:
             try:
                 self.options["columnwidths"][col] = self.column(col, "width")
             except Exception:
@@ -91,8 +95,10 @@ class FileTree(ttk.Treeview):
                 tags = self.getTags(file)
                 name, typ = os.path.splitext(info["file"])
                 size = filesize(os.path.getsize(file))
+                date = os.path.getctime(file)
                 self.insert("", "end", file, text = name,
-                            values = (info["dir"], typ[1:], size), tag = tags)
+                            values = (info["dir"], typ[1:], size, strftime("%d.%m.%Y %H:%M:%S", gmtime(date))),
+                            tag = tags)
                 for tag in info["tags"]:
                     if tag in self.options["tags"]:
                         self.set(file, tag, "x")
@@ -266,6 +272,14 @@ class FileTree(ttk.Treeview):
         self.refresh()
         self.ordering = self.orderByDirectory
 
+
+    def orderByDate(self):
+        "orders files by name of the parent directory"
+        self.filestorage.files = OrderedDict(sorted(self.filestorage.files.items(),
+                                                    key = lambda i: os.path.getctime(i[0])))
+        self.refresh()
+        self.ordering = self.orderByDirectory
+        
 
     def orderByTag(self, tag):
         self.filestorage.files = OrderedDict(reversed(sorted(self.filestorage.files.items(),
