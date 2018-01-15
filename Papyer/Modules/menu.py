@@ -35,6 +35,8 @@ class TopMenu(Menu):
         self.menuAbout = Menu(self)
 
         self.capitalizationVar = BooleanVar()
+        if not self.root.options["capitalization"]:
+            self.root.options["capitalization"] = False
         self.capitalizationVar.set(self.root.options["capitalization"])
 
         menuWidth = 8
