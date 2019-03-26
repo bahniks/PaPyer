@@ -278,7 +278,7 @@ class FileTree(ttk.Treeview):
         self.filestorage.files = OrderedDict(sorted(self.filestorage.files.items(),
                                                     key = lambda i: os.path.getctime(i[0])))
         self.refresh()
-        self.ordering = self.orderByDirectory
+        self.ordering = self.orderByDate
         
 
     def orderByTag(self, tag):
