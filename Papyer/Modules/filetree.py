@@ -67,9 +67,10 @@ class FileTree(ttk.Treeview):
         self.bind("<<TreeviewSelect>>", self.onSelection)
         
         self.tag_configure("duplicate", background = "white")
-        
-        self.duplicatesShown = False
+
+        self.duplicatesShown = True
         self.onlyDuplicates = False
+        self.duplicatesFun = None
         self.conditions = []
         self.filters = {}
         self.ordering = None
@@ -248,14 +249,18 @@ class FileTree(ttk.Treeview):
         self.refresh()
         
 
-    def toggleDuplicates(self):
-        if self.duplicatesShown:
+    def toggleDuplicates(self, setting):
+        if setting == "show":
+            self.tag_configure("duplicate", background = "white")
+            self.duplicatesShown = True          
+        elif setting == "hide":
             self.tag_configure("duplicate", background = "white")
             self.duplicatesShown = False
-        else:
+        elif setting == "highlight":
             self.tag_configure("duplicate", background = "yellow")
             self.duplicatesShown = True
- 
+        self.changeDuplicates()
+
 
     def orderByFilename(self):
         "orders files by filename"
@@ -331,6 +336,19 @@ class FileTree(ttk.Treeview):
             self.onlyDuplicates = lambda f: (self.filestorage.files[f]["file"] in
                                              self.filestorage.duplicates)
             self.conditions.append(self.onlyDuplicates)
+        self.refresh()
+
+
+    def changeDuplicates(self):
+        if self.duplicatesShown:
+            if self.duplicatesFun in self.conditions:
+                self.conditions.remove(self.duplicatesFun)
+            self.duplicatesFun = None
+        else:
+            self.duplicatesFun = lambda f: ((self.filestorage.files[f]["file"] in self.filestorage.duplicates and
+                                            f == self.filestorage.duplicates[self.filestorage.files[f]["file"]][0]) or
+                                            not self.filestorage.files[f]["file"] in self.filestorage.duplicates)
+            self.conditions.append(self.duplicatesFun)
         self.refresh()
 
 

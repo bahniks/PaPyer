@@ -29,10 +29,25 @@ class Buttons(Frame):
         
         self.root = root
         self.filestorage = self.root.filestorage
+        self.duplicatesVar = StringVar()
+        self.duplicatesVar.set("show")
 
-        self.duplicatesBut = ttk.Button(self, command = self.duplicates,
-                                        text = "Show duplicates", width = 15)
-        self.duplicatesBut.grid(column = 1, row = 0)
+        self.duplicatesFrame = ttk.Labelframe(self, text = "Duplicates")
+        self.duplicatesFrame.grid(column = 1, row = 0)
+
+        self.duplicatesShow = ttk.Radiobutton(self.duplicatesFrame, command = self.duplicates,
+                                             text = "Show", width = 10,
+                                             variable = self.duplicatesVar, value = "show")
+        self.duplicatesShow.grid(column = 0, row = 0)
+        self.duplicatesHide = ttk.Radiobutton(self.duplicatesFrame, command = self.duplicates,
+                                             text = "Hide", width = 10,
+                                             variable = self.duplicatesVar, value = "hide")
+        self.duplicatesHide.grid(column = 1, row = 0)
+        self.duplicatesHighlight = ttk.Radiobutton(self.duplicatesFrame, command = self.duplicates,
+                                             text = "Highlight", width = 10,
+                                             variable = self.duplicatesVar, value = "highlight")
+        self.duplicatesHighlight.grid(column = 2, row = 0)
+        
         self.refreshBut = ttk.Button(self, command = self.root.refresh,
                                      text = "Refresh", width = 15)
         self.refreshBut.grid(column = 2, row = 0)
@@ -44,11 +59,7 @@ class Buttons(Frame):
 
 
     def duplicates(self):
-        self.root.filetree.toggleDuplicates()
-        if self.root.filetree.duplicatesShown:
-            self.duplicatesBut["text"] = "Hide duplicates"
-        else:
-            self.duplicatesBut["text"] = "Show duplicates"
+        self.root.filetree.toggleDuplicates(self.duplicatesVar.get())
 
 
 

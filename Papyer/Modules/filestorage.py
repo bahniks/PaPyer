@@ -73,10 +73,10 @@ class FileStorage:
                                         "note": note}
                     self.filenames[file].append(path)
                     count += 1
-        self.duplicates = set()
+        self.duplicates = {}
         for filename, paths in self.filenames.items():
             if len(paths) > 1:
-                self.duplicates.add(filename)
+                self.duplicates[filename] = paths
                     
 
     def save(self):
